@@ -3,17 +3,15 @@ const express = require('express')
 const cors = require('cors')
 const app = express()
 
-const db = require('./database/db')
-const createInitialData = require('./database/createInitialData') //Only to show initial data
+const db = require('./database/db')//Only to show initial data
 
-db.sequelize.sync({force: true}).then(() => {
-    createInitialData()
-})
+db.sequelize.sync({force: true})
 
 //Import the routes
 const categoriesRouter = require('./routes/categoryRoutes')
 const transactionsRouter = require('./routes/transactionRoutes')
 const typesRouter = require('./routes/typeRoutes')
+const usersRouter = require('./routes/userRouter')
 
 app.use(cors())
 app.use(express.json())
@@ -25,6 +23,7 @@ app.get('/', (req, res) => {
 app.use('/api/transactions', transactionsRouter)
 app.use('/api/types', typesRouter)
 app.use('/api/categories', categoriesRouter)
+app.use('/api/users', usersRouter)
 
 const PORT = process.env.PORT || 3030
 

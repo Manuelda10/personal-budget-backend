@@ -29,7 +29,7 @@ const getOneTransaction = async (req, res) => {
 
 //POST
 const postOneTransaction = async (req, res) => {
-    const { concept, amount, date, categoryId, typeId } = req.body
+    const { concept, amount, date, categoryId, typeId, userId } = req.body
     
     if (!concept) {
         return res.status(400).send({
@@ -42,7 +42,8 @@ const postOneTransaction = async (req, res) => {
         amount,
         date,
         categoryId,
-        typeId
+        typeId,
+        userId
     }
 
     try {
