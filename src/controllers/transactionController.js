@@ -1,4 +1,5 @@
 const { Transaction } = require("../models/association")
+const jwt = require('jsonwebtoken')
 
 //GET
 const getAllTransactions = async (req, res) => {
@@ -29,25 +30,56 @@ const getOneTransaction = async (req, res) => {
 
 //POST
 const postOneTransaction = async (req, res) => {
-    const { concept, amount, date, categoryId, typeId, userId } = req.body
-    
-    if (!concept) {
-        return res.status(400).send({
-            message: 'Concept can not be empty'
-        })
-    }
-
-    const transaction = {
-        concept,
-        amount,
-        date,
-        categoryId,
-        typeId,
-        userId
-    }
+    const { concept, amount, date, categoryId, typeId } = req.body
 
     try {
+
+        //Make sure the authorization is correct
+        const auth = req.get('authorization')
+        let token = null
+
+        if (auth && auth.toLowerCase().startsWith('bearer')) {
+            token = auth.split(' ')[1]
+        }
+
+        console.log("This is the token: "+token)
+        
+        const decodedToken = jwt.verify(token, process.env.SECRET)
+
+        if (!token || !decodedToken.id) {
+            return res.status(401).json({
+                error: 'Token missing or invalid'
+            })
+        }
+
+        console.log("Decoded token")
+        console.log(decodedToken)
+
+        const { id: userId } = decodedToken
+        console.log("This is the user Id: "+userId)
+
+        if (!concept) {
+            return res.status(400).send({
+                message: 'Concept can not be empty'
+            })
+        }
+
+        const transaction = {
+            concept,
+            amount,
+            date,
+            categoryId,
+            typeId,
+            userId
+        }
+
+        console.log(transaction)
+
+        //Save the transaction: Here is the error
         const savedTransaction = await Transaction.create(transaction)
+
+        console.log("Saved transaction")
+        console.log(savedTransaction)
         res.status(201).json(savedTransaction)
     } catch (err) {
         res.status(500).send({

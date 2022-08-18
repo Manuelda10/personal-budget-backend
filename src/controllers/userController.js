@@ -1,4 +1,5 @@
 const bcrypt = require('bcrypt')
+const jwt = require('jsonwebtoken')
 const { User } = require('../models/association')
 
 const postOneUser = async (req, res) => {
@@ -45,7 +46,44 @@ const getAllUsers = async (req, res) => {
     }
 }
 
+const loginUser = async (req, res) => {
+    const { username, password } = req.body
+    
+    try {
+        const user = await User.findOne({ where: { username } })
+        
+        const passwordCorrect = user === null
+            ? false
+            : await bcrypt.compare(password, user.password)
+        
+        if (!(user && passwordCorrect)) {
+            res.status(401).json({
+                error: 'Invalid user or password'
+            })
+        } else {
+            const userForToken = {
+                id: user.id,
+                username: user.username
+            }
+
+            const token = jwt.sign(userForToken, process.env.SECRET)
+
+            res.send({
+                name: user.username,
+                token
+            })
+        }
+        
+    } catch (err) {
+        res.status(500).send({
+            message: 'An error ocurred while login the user'
+        })
+    }
+    
+}
+
 module.exports = {
     postOneUser,
-    getAllUsers
+    getAllUsers,
+    loginUser
 }
