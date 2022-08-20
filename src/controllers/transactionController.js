@@ -75,7 +75,7 @@ const postOneTransaction = async (req, res) => {
 
         console.log(transaction)
 
-        //Save the transaction: Here is the error
+        //Save the transaction: It has to be created after creating a type and category
         const savedTransaction = await Transaction.create(transaction)
 
         console.log("Saved transaction")
