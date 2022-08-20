@@ -31,33 +31,9 @@ const getOneTransaction = async (req, res) => {
 //POST
 const postOneTransaction = async (req, res) => {
     const { concept, amount, date, categoryId, typeId } = req.body
+    const {userId} = req
 
     try {
-
-        //Make sure the authorization is correct
-        const auth = req.get('authorization')
-        let token = null
-
-        if (auth && auth.toLowerCase().startsWith('bearer')) {
-            token = auth.split(' ')[1]
-        }
-
-        console.log("This is the token: "+token)
-        
-        const decodedToken = jwt.verify(token, process.env.SECRET)
-
-        if (!token || !decodedToken.id) {
-            return res.status(401).json({
-                error: 'Token missing or invalid'
-            })
-        }
-
-        console.log("Decoded token")
-        console.log(decodedToken)
-
-        const { id: userId } = decodedToken
-        console.log("This is the user Id: "+userId)
-
         if (!concept) {
             return res.status(400).send({
                 message: 'Concept can not be empty'
@@ -77,9 +53,6 @@ const postOneTransaction = async (req, res) => {
 
         //Save the transaction: It has to be created after creating a type and category
         const savedTransaction = await Transaction.create(transaction)
-
-        console.log("Saved transaction")
-        console.log(savedTransaction)
         res.status(201).json(savedTransaction)
     } catch (err) {
         res.status(500).send({
